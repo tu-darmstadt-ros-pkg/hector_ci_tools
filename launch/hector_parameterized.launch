@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="arena" default="maze_many_victims" />
+  <arg name="mission_behavior" default="Search Victims" />
+  <arg name="mission_sim_time" default="50" />
+  <arg name="mission_finalizers" default="saveGeotiff.SaveGeotiff" />
+
+  <param name="mission_behavior" value="$(arg mission_behavior)" />
+  <param name="mission_sim_time" value="$(arg mission_sim_time)" />
+  <param name="mission_finalizers" value="$(arg mission_finalizers)" />
+
+  <node pkg="hector_ci_tools" type="hector_ci_node" name="hector_ci_tools_node" output="screen" required="true" />
+  <node name="behavior_server_launcher" pkg="flexbe_widget" type="be_action_server" output="screen" />
+
+  <include file="$(find hector_nist_arena_worlds)/launch/$(arg arena).launch">
+    <arg name="gui" value="false" />
+  </include>
+  <include file="$(find hector_tracker_sim_launch)/launch/spawn_tracker_with_hector_mapping.launch">
+    <arg name="s_x_pos" value="0" />
+    <arg name="s_y_pos" value="0" />
+    <arg name="s_z_pos" value="0.2" />
+  </include>
+
+</launch>
