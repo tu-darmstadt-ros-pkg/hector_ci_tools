@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+import roslib; roslib.load_manifest('hector_ci_tools')
+import rospy
+import time
+from hector_ci_tools.hectorCiNode import HectorSimulationControl
+
+
+"""Starts ROS-node that controls a mission with pre-defined parameters.
+
+Uses instance of HectorSimulationControl to control behavior.
+"""
+rospy.init_node("hector_ci_tools")
+time.sleep(0.5)
+r = rospy.Rate(10)  # 10hz
+
+hector_sim_control = HectorSimulationControl()
+
+while not hector_sim_control.max_sim_time_reached():
+    time.sleep(10)
+
+hector_sim_control.perform_final_actions()
+
+rospy.signal_shutdown("[argo_ci_tools]: stopped normally.")
