@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-from ci_tools.ciTools import SimulationControl
 import rospy
-from helpers.hector_ci_loginfo import HectorCiLogInfo
+from ci_tools.simulation_control import SimulationControl
+from ci_tools.helpers.ci_log import CiLog
 
 
 class HectorSimulationControl(SimulationControl):
@@ -17,16 +17,8 @@ class HectorSimulationControl(SimulationControl):
 
         self.start_sim()
         self.start_behavior(self._mission_behavior)
-        HectorCiLogInfo.log("Initialization finished.")
+        CiLog.info("Initialization finished.")
 
-    def import_finalizers(self,):
-        """Import of finalizer classes that will be executed."""
-        if len(self._mission_finalizers) > 0:
-            mission_finalizers_list = self._mission_finalizers.split(",")
-            for mission_finalizer in mission_finalizers_list:
-                module_class = mission_finalizer.split(".")
-                module = __import__('finalizers.' + module_class[0], fromlist=[module_class[1]])
-                self._finalizer_classes.append(getattr(module, module_class[1]))
 
     def read_ros_additional_ros_params(self):
         """Reads additional ROS parameters that are not considered by SimulationControl.read_ros_additional_ros_params()."""

@@ -2,7 +2,7 @@
 import roslib; roslib.load_manifest('hector_ci_tools')
 import rospy
 import time
-from hector_ci_tools.hectorCiNode import HectorSimulationControl
+from hector_ci_tools.hector_simulation_control import HectorSimulationControl
 
 
 """Starts ROS-node that controls a mission with pre-defined parameters.
@@ -15,7 +15,7 @@ r = rospy.Rate(10)  # 10hz
 
 hector_sim_control = HectorSimulationControl()
 
-while not hector_sim_control.max_sim_time_reached():
+while not hector_sim_control.is_simulation_finished():
     time.sleep(10)
 
 hector_sim_control.perform_final_actions()
