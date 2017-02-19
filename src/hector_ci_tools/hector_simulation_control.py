@@ -17,7 +17,9 @@ class HectorSimulationControl(SimulationControl):
 
         self.start_sim()
         self.start_behavior(self._mission_behavior)
-        CiLog.info("Initialization finished.")
+        CiLog.info("Initialization finished. Starting timer")
+        self.start_simulation_timer()
+
 
 
     def read_ros_additional_ros_params(self):
