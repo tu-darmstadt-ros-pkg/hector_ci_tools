@@ -1,0 +1,105 @@
+#!/bin/bash
+set -m
+# Bash script that launches the hector_ci_tools ROS-package with parameters.
+#
+# Parameters:
+# $1: Length of sim time for each trial.
+# $2: Behavior that will be started.
+# $3: Arena that will be used.
+# $4: (optional) Path to script that copies geotiff maps (and its parameters). See hector_jenkins repo.
+# $5: (optional)Path to script that saves logfiles. See hector_jenkins repo.
+
+SHUTDOWN_IN_PROGRESS=''
+
+_killtree() {
+    local _pid=$1
+    local _sig=${2:--TERM}
+
+    kill -stop ${_pid} # needed to stop quickly forking parent from producing children between child killing and parent killing
+    for _child in $(ps -o pid --no-headers --ppid ${_pid}); do
+        _killtree ${_child} ${_sig}
+    done
+    kill -${_sig} ${_pid}
+}
+
+killtree() {
+    local _pid=$1
+    local _sig=${2:--TERM}
+
+	# get child processed
+    local _list1=$(ps -o pid --no-headers --ppid ${_pid} | sort)
+    local _list2=$(ps -o pid --no-headers --ppid ${_pid} | sort)
+    # filter out own process id
+    local _list=$(comm -12 <(cat <<< "$_list1") <(cat <<< "$_list2"))
+
+	# stop and kill all descendants
+    for _child in ${_list}; do
+        _killtree ${_child} ${_sig}
+    done
+}
+
+_exit() {
+	ERROR_CODE=$1
+	SHUTDOWN_IN_PROGRESS='yes'
+	echo "Exiting with error code '$ERROR_CODE'."
+
+	# make sure to exit with right error code
+    trap 'exit $ERROR_CODE' HUP INT QUIT KILL TERM EXIT
+
+    echo "Cleaning up processes before exiting..."
+	killtree $$ 9
+
+	# clear trap
+    trap - HUP INT QUIT KILL TERM EXIT
+    exit $ERROR_CODE
+}
+
+exit_with_error() {
+	_exit -1
+}
+
+exit_without_error() {
+	_exit 0
+}
+
+USAGE="Command usage: ./run_hector <simtime-in-s> <behavior> <arena>"
+
+
+if [ ! -z "$1" ]; then
+  SIMTIME=$1
+else
+  echo $USAGE
+  echo "ERROR: Please specify a sim-time (in seconds)!"
+  exit 1
+fi
+
+if [ ! -z "$2" ]; then
+  BEHAVIOR=$2
+else
+  echo $USAGE
+  echo "ERROR: Please specify a behavior"
+  exit 1
+fi
+
+if [ ! -z "$3" ]; then
+  ARENA=$3
+else
+  echo $USAGE
+  echo "ERROR: Please specify an arena"
+  exit 1
+fi
+
+echo Simtime is $SIMTIME , behavior is $BEHAVIOR and arena is $ARENA
+
+# trap kill signals to cleanup first and the exit with error
+trap exit_with_error HUP INT QUIT KILL TERM EXIT
+
+roscore&
+sleep 10
+roslaunch hector_ci_tools hector_parameterized.launch mission_sim_time:=$SIMTIME mission_behavior:="$BEHAVIOR" arena:=$ARENA
+sleep 10
+
+
+if [ -z "$SHUTDOWN_IN_PROGRESS" ]; then
+	exit_without_error
+fi
