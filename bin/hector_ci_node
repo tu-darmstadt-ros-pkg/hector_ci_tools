@@ -20,4 +20,4 @@ while not hector_sim_control.is_simulation_finished():
 
 hector_sim_control.perform_final_actions()
 
-rospy.signal_shutdown("[argo_ci_tools]: stopped normally.")
+rospy.signal_shutdown("[hector_ci_tools]: stopped normally.")

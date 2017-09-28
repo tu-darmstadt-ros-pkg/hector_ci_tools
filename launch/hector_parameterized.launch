@@ -3,7 +3,7 @@
   <arg name="arena" default="maze_many_victims" />
   <arg name="mission_behavior" default="Search Victims" />
   <arg name="mission_sim_time" default="50" />
-  <arg name="mission_finalizers" default="saveGeotiff.SaveGeotiff" />
+  <arg name="mission_finalizers" default="saveGeotiff.save_geotiff" />
 
   <param name="mission_behavior" value="$(arg mission_behavior)" />
   <param name="mission_sim_time" value="$(arg mission_sim_time)" />
